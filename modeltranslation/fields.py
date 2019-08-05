@@ -306,6 +306,12 @@ class TranslationFieldDescriptor(object):
         self.fallback_value = fallback_value
         self.fallback_undefined = fallback_undefined
 
+    def get_language(self):
+        """
+        Returns the currently active language that should be used as a default language.
+        """
+        return get_language()
+
     def __set__(self, instance, value):
         """
         Updates the translation field for the current language.
@@ -318,7 +324,7 @@ class TranslationFieldDescriptor(object):
             # When assignment takes place in model instance constructor, don't set value.
             # This is essential for only/defer to work, but I think it's sensible anyway.
             return
-        loc_field_name = build_localized_fieldname(self.field.name, get_language())
+        loc_field_name = build_localized_fieldname(self.field.name, self.get_language())
         setattr(instance, loc_field_name, value)
 
     def meaningful_value(self, val, undefined):
@@ -343,7 +349,7 @@ class TranslationFieldDescriptor(object):
         if undefined is NONE:
             default = self.field.get_default()
             undefined = default
-        langs = resolution_order(get_language(), self.fallback_languages)
+        langs = resolution_order(self.get_language(), self.fallback_languages)
         for lang in langs:
             loc_field_name = build_localized_fieldname(self.field.name, lang)
             val = getattr(instance, loc_field_name, None)
