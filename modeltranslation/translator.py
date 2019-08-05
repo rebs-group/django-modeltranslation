@@ -535,11 +535,13 @@ class Translator:
         model_fallback_languages = getattr(opts, 'fallback_languages', None)
         model_fallback_values = getattr(opts, 'fallback_values', NONE)
         model_fallback_undefined = getattr(opts, 'fallback_undefined', NONE)
+        model_fields_descriptors = getattr(opts, 'fields_descriptors', {})
         for field_name in opts.local_fields.keys():
             field = model._meta.get_field(field_name)
             field_fallback_value = parse_field(model_fallback_values, field_name, NONE)
             field_fallback_undefined = parse_field(model_fallback_undefined, field_name, NONE)
-            descriptor = TranslationFieldDescriptor(
+            field_descriptor_class = model_fields_descriptors.get(field_name, TranslationFieldDescriptor)
+            descriptor = field_descriptor_class(
                 field,
                 fallback_languages=model_fallback_languages,
                 fallback_value=field_fallback_value,
